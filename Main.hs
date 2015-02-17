@@ -17,11 +17,23 @@ main = do
 
 process s = (readString [withValidate no, withParseHTML yes, withInputEncoding utf8] s
               >>> processChildren (processDocumentRootElement `when` isElem) 
-              >>> (writeDocumentToString [withIndent yes]  &&& constA "test")
+              >>> (writeDocumentToString [withIndent yes]  &&& getUserState)
               )
 
 processDocumentRootElement
-     = this         -- substitute this by the real application
+     = deep (
+        hasName "img"
+        >>> processAttrl ( processSrc `when` hasName "src" )
+        )
+
+processSrc :: IOSLA (XIOState MyState) XmlTree XmlTree
+processSrc = 
+    replaceChildren 
+      (xshow getChildren
+      >>> arr (++ "TEST SRC")
+      >>> mkText
+      -- >>> setUserState (MyState ["hello"])
+      )
 
 
 

@@ -12,13 +12,12 @@ type MyArrow = IOSLA MyState XmlTree XmlTree
 main = do
   raw <- getContents
   let s = MyState []
-  (xios, res) <- runIOSLA (process raw) (initialState s) undefined
+  (_, res) <- runIOSLA (process raw) (initialState s) undefined
   print res
-  print (localImages $ xios)
 
 process s = (readString [withValidate no, withParseHTML yes, withInputEncoding utf8] s
               >>> processChildren (processDocumentRootElement `when` isElem) 
-              >>> writeDocumentToString [withIndent yes] 
+              >>> (writeDocumentToString [withIndent yes]  &&& constA "test")
               )
 
 processDocumentRootElement

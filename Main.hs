@@ -14,8 +14,8 @@ main = do
   raw <- getContents
   let s = MyState []
   (_, res) <- runIOSLA (process raw) (initialState s) undefined
-  mapM_ (\(res, state) ->do
-          putStrLn res
+  mapM_ (\(html, state) ->do
+          putStrLn html
           print state
           ) res
 

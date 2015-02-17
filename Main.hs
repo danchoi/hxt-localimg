@@ -30,10 +30,14 @@ processSrc :: IOSLA (XIOState MyState) XmlTree XmlTree
 processSrc = 
     replaceChildren 
       (xshow getChildren
-      >>> arr (++ "TEST SRC")
+      -- >>> arr (++ "TEST SRC")
+      -- arrIO :: (b -> IO c) -> a b c
+      >>> arrIO ioAction 
+      -- >>> -> setUserState (MyState ["hello"]) >>> x)
       >>> mkText
-      -- >>> setUserState (MyState ["hello"])
       )
 
 
+ioAction :: String -> IO String
+ioAction = return . (++ " IN IO")
 

@@ -32,7 +32,11 @@ processSrc =
     replaceChildren 
       (xshow getChildren
       >>> arrIO ioAction 
-      -- >>> setUserState (MyState ["hello"]) >>> x)
+      >>> perform 
+            -- changeState :: (s -> b -> s) -> a b b
+            -- changeUserState :: (b -> s -> s) -> IOStateArrow s b b
+            (changeUserState (\filePath s -> MyState $ filePath :(localImages s))) 
+            
       >>> mkText)
 
 

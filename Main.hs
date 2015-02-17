@@ -14,7 +14,10 @@ main = do
   raw <- getContents
   let s = MyState []
   (_, res) <- runIOSLA (process raw) (initialState s) undefined
-  print res
+  mapM_ (\(res, state) ->do
+          putStrLn res
+          print state
+          ) res
 
 process s = (readString [withValidate no, withParseHTML yes, withInputEncoding utf8] s
               >>> processChildren (processDocumentRootElement `when` isElem) 
@@ -22,9 +25,8 @@ process s = (readString [withValidate no, withParseHTML yes, withInputEncoding u
               )
 
 processDocumentRootElement
-     = deep (
-        hasName "img"
-        >>> processAttrl ( processSrc `when` hasName "src" )
+     = processTopDown (
+        processAttrl (processSrc `when` hasName "src") `when` (isElem >>> hasName "img")
         )
 
 processSrc :: IOSLA (XIOState MyState) XmlTree XmlTree
@@ -32,6 +34,7 @@ processSrc =
     replaceChildren 
       (xshow getChildren
       >>> arrIO ioAction 
+      -- perform :: a b c -> a b b
       >>> perform 
             -- changeState :: (s -> b -> s) -> a b b
             -- changeUserState :: (b -> s -> s) -> IOStateArrow s b b

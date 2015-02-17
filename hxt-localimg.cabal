@@ -21,5 +21,6 @@ executable hxt-localimg
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8
                      , hxt
+                     , process
   -- hs-source-dirs:      
   default-language:    Haskell2010

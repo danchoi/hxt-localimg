@@ -2,6 +2,7 @@
 module Main where
 import Text.XML.HXT.Core
 import Text.XML.HXT.Arrow.XmlState.RunIOStateArrow
+import System.Process
 
 data MyState = MyState {
     localImages :: [FilePath]
@@ -30,14 +31,16 @@ processSrc :: IOSLA (XIOState MyState) XmlTree XmlTree
 processSrc = 
     replaceChildren 
       (xshow getChildren
-      -- >>> arr (++ "TEST SRC")
-      -- arrIO :: (b -> IO c) -> a b c
       >>> arrIO ioAction 
-      -- >>> -> setUserState (MyState ["hello"]) >>> x)
-      >>> mkText
-      )
+      -- >>> setUserState (MyState ["hello"]) >>> x)
+      >>> mkText)
 
 
 ioAction :: String -> IO String
-ioAction = return . (++ " IN IO")
+ioAction src = do
+  (_, out, _) <- readProcessWithExitCode "./test.sh" [src] src
+  return out 
+
+
+
 

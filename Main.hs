@@ -25,6 +25,7 @@ main = do
 
 
 ------------------------------------------------------------------------
+-- function to export
 
 processHtmlBody :: String   
                 -> (ImgSrcString -> IO (CID, FilePath))
@@ -33,6 +34,8 @@ processHtmlBody rawHtml iofunc = do
   let s = ImageExtractionState iofunc []
   (_, ((html,s):_)) <- runIOSLA (process rawHtml) (initialState s) undefined
   return (html, inlineImages s)
+
+------------------------------------------------------------------------
 
 type CID = String
 type ImgSrcString = String

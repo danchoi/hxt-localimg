@@ -22,5 +22,6 @@ executable hxt-localimg
   build-depends:       base >=4.7 && <4.8
                      , hxt
                      , process
+                     , filepath
   -- hs-source-dirs:      
   default-language:    Haskell2010

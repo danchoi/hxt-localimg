@@ -2,11 +2,11 @@ hxt-localimg
 
 Exercise. Download remote images and change img src tags
 
-
 Usage
 
 hxt-localimg < file.html 
 
-Images downloaded to working dir
+
+See Main.hs for more explanation
 
 

@@ -2,7 +2,6 @@
 module Main where
 import Text.XML.HXT.Core
 import Text.XML.HXT.Arrow.XmlState.RunIOStateArrow
-import System.Process
 import System.FilePath.Posix
 
 type ImageExtractionArrow = IOSLA (XIOState ImageExtractionState) XmlTree XmlTree

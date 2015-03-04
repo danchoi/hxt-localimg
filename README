@@ -4,7 +4,7 @@ Proof of concept. Change img src tags with a parameterized IO function
 
 Usage
 
-hxt-localimg < file.html 
+hxt-localimg < simple.html 
 
 See Main.hs for more explanation
 

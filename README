@@ -1,11 +1,10 @@
 hxt-localimg
 
-Exercise. Download remote images and change img src tags
+Proof of concept. Change img src tags with a parameterized IO function
 
 Usage
 
 hxt-localimg < file.html 
-
 
 See Main.hs for more explanation
 

@@ -17,10 +17,10 @@ main = do
   -- If the src value is a data-uri, save a binary version of the content 
   -- somewhere and then return the filepath to that temporary file.
 
-  let srcProcessFunction :: String -> IO (CID, FilePath)
-      srcProcessFunction src = return ("cid:test.jpg", "test.jpg")
+  let srcHandler :: String -> IO (CID, FilePath)
+      srcHandler src = return ("cid:test.jpg", "test.jpg")
 
-  (html, extractionState) <- processHtmlBody raw srcProcessFunction
+  (html, extractionState) <- processHtmlBody raw srcHandler
   -- output the processed html
   putStrLn html
   -- output the [(CID, FilePath)] of the inlined images

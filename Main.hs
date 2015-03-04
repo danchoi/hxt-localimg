@@ -10,7 +10,6 @@ type ImageExtractionArrow = IOSLA (XIOState ImageExtractionState) XmlTree XmlTre
 main = do
   -- get html content as String
   raw <- getContents
-
   -- This is an IO function that the consuming code defines.
   -- The input is the "src" attribute of every image in the HTML.
   -- The return value should be a CID identifier string and a filepath

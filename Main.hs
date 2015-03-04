@@ -4,8 +4,6 @@ import Text.XML.HXT.Core
 import Text.XML.HXT.Arrow.XmlState.RunIOStateArrow
 import System.FilePath.Posix
 
-type ImageExtractionArrow = IOSLA (XIOState ImageExtractionState) XmlTree XmlTree
-
 main = do
   -- get html content as String
   raw <- getContents
@@ -49,6 +47,8 @@ data ImageExtractionState = ImageExtractionState {
   , inlineImages :: [(CID,FilePath)]
   } 
 
+
+type ImageExtractionArrow = IOSLA (XIOState ImageExtractionState) XmlTree XmlTree
 
 {- Takes an img SRC and returns 
     - CID string to put into the src attribute

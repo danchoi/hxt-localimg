@@ -19,22 +19,22 @@ main = do
   let srcHandler :: String -> IO (CID, FilePath)
       srcHandler src = return ("cid:test.jpg", "test.jpg")
 
-  (html, extractionState) <- processHtmlBody raw srcHandler
+  (html, images) <- processHtmlBody raw srcHandler
   -- output the processed html
   putStrLn html
   -- output the [(CID, FilePath)] of the inlined images
-  print $ inlineImages extractionState
+  print images
 
 
 ------------------------------------------------------------------------
 
 processHtmlBody :: String   
                 -> (ImgSrcString -> IO (CID, FilePath))
-                -> IO (String, ImageExtractionState)
+                -> IO (String, [(CID, FilePath)])  -- ^ transformed HTML, and list of image files to put inline
 processHtmlBody rawHtml iofunc = do
   let s = ImageExtractionState iofunc []
-  (_, (x:_)) <- runIOSLA (process rawHtml) (initialState s) undefined
-  return x
+  (_, ((html,s):_)) <- runIOSLA (process rawHtml) (initialState s) undefined
+  return (html, inlineImages s)
 
 type CID = String
 type ImgSrcString = String

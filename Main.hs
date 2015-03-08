@@ -9,13 +9,12 @@ main = do
   raw <- getContents
   -- This is an IO function that the consuming code defines.
   -- The input is the "src" attribute of every image in the HTML.
-  -- The return value should be a CID identifier string and a filepath
-  -- to the binary data of the image.
+  
   -- If the src value is a data-uri, save a binary version of the content 
   -- somewhere and then return the filepath to that temporary file.
 
-  let srcHandler :: String -> IO (CID, FilePath)
-      srcHandler src = return ("cid:test.jpg", "test.jpg")
+  let srcHandler :: String -> IO (CID, FilePath, ContentType)
+      srcHandler src = return ("cid:test.jpg", "test.jpg", "image/jpg")
 
   (html, images) <- processHtmlBody raw srcHandler
   -- output the processed html
@@ -28,8 +27,8 @@ main = do
 -- function to export
 
 processHtmlBody :: String   
-                -> (ImgSrcString -> IO (CID, FilePath))
-                -> IO (String, [(CID, FilePath)])  -- ^ transformed HTML, and list of image files to put inline
+                -> (ImgSrcString -> IO (CID, FilePath, ContentType))
+                -> IO (String, [(CID, FilePath, ContentType)])  -- ^ transformed HTML, and list of image files to put inline
 processHtmlBody rawHtml iofunc = do
   let s = ImageExtractionState iofunc []
   (_, ((html,s):_)) <- runIOSLA (process rawHtml) (initialState s) undefined
@@ -37,6 +36,7 @@ processHtmlBody rawHtml iofunc = do
 
 ------------------------------------------------------------------------
 
+type ContentType = String
 type CID = String
 type ImgSrcString = String
 
@@ -46,8 +46,8 @@ binary data in a DB, look up a file, or extract a data URI value and save it in
 binary to a temporary file.  -}
 
 data ImageExtractionState = ImageExtractionState {
-    processImageSrc :: String -> IO (CID, FilePath)
-  , inlineImages :: [(CID,FilePath)]
+    processImageSrc :: String -> IO (CID, FilePath, ContentType)
+  , inlineImages :: [(CID,FilePath, ContentType)]
   } 
 
 
@@ -57,10 +57,10 @@ type ImageExtractionArrow = IOSLA (XIOState ImageExtractionState) XmlTree XmlTre
     - CID string to put into the src attribute
     - filepath to the image binary data
 -}
-ioAction :: String -> ImageExtractionState -> IO (String, FilePath)
+ioAction :: String -> ImageExtractionState -> IO (String, FilePath, ContentType)
 ioAction src ImageExtractionState{..} = do
-  (newSrc, filepath) <- processImageSrc src
-  return (newSrc, filepath)
+  (newSrc, filepath, contentType) <- processImageSrc src
+  return (newSrc, filepath, contentType)
 
 process :: String -> IOSLA (XIOState ImageExtractionState) a (String, ImageExtractionState)
 process s = (readString [withValidate no, withParseHTML yes, withInputEncoding utf8] s
@@ -83,9 +83,9 @@ processSrc =
       arrIO2 ioAction 
       >>> 
       changeUserState 
-         (\(newSrc, filepath) s -> s { inlineImages = (newSrc, filepath):(inlineImages s)})
+         (\(newSrc, filepath, contentType) s -> s { inlineImages = (newSrc, filepath, contentType):(inlineImages s)})
       >>>
-      arr fst 
+      arr (\(x,_,_) -> x)
       >>> 
       mkText
 

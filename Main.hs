@@ -31,7 +31,7 @@ processHtmlBody :: String
                 -> IO (String, [(CID, FilePath, ContentType)])  -- ^ transformed HTML, and list of image files to put inline
 processHtmlBody rawHtml iofunc = do
   let s = ImageExtractionState iofunc []
-  (_, ((html,s):_)) <- runIOSLA (process rawHtml) (initialState s) undefined
+  (_, ((html,s):_)) <- runIOSLA (processWithWrapper rawHtml) (initialState s) undefined
   return (html, inlineImages s)
 
 ------------------------------------------------------------------------
@@ -61,6 +61,25 @@ ioAction :: String -> ImageExtractionState -> IO (String, FilePath, ContentType)
 ioAction src ImageExtractionState{..} = do
   (newSrc, filepath, contentType) <- processImageSrc src
   return (newSrc, filepath, contentType)
+
+
+processWithWrapper :: String -> IOSLA (XIOState ImageExtractionState) a (String, ImageExtractionState)
+processWithWrapper s = 
+      (readString [withValidate no, withParseHTML yes, withInputEncoding utf8] s
+      >>> ((deep (isElem >>> hasName "body" >>> getChildren)) `orElse` returnA)
+      >>> processChildren (processDocumentRootElement `when` isElem) >>> wrapHtml
+      >>> (writeDocumentToString [withIndent yes]  &&& getUserState))
+
+wrapHtml :: ImageExtractionArrow 
+wrapHtml = 
+    root [] [
+      mkelem "html" [sattr "lang" "en"] 
+        [ mkelem "head" [] [aelem "meta" [sattr "charset" "utf-8"]]
+        , mkelem "body" [] [ getChildren ]
+        ]
+      ]
+
+
 
 process :: String -> IOSLA (XIOState ImageExtractionState) a (String, ImageExtractionState)
 process s = (readString [withValidate no, withParseHTML yes, withInputEncoding utf8] s
